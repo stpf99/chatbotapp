@@ -33,14 +33,16 @@ class ChatWindow(Gtk.Window):
         chat_scroll.add(self.chat_view)
         vbox.pack_start(chat_scroll, True, True, 0)
 
-        input_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        input_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, 
+spacing=6)
         input_box.pack_start(self.input_view, True, True, 0)
         input_box.pack_start(self.send_button, False, False, 0)
         vbox.pack_start(input_box, False, False, 0)
 
         # Uruchamianie pętli zdarzeń asyncio w osobnym wątku
         self.loop = asyncio.new_event_loop()
-        self.loop_thread = threading.Thread(target=self.start_loop, daemon=True)
+        self.loop_thread = threading.Thread(target=self.start_loop, 
+daemon=True)
         self.loop_thread.start()
 
     def start_loop(self):
@@ -50,15 +52,18 @@ class ChatWindow(Gtk.Window):
     def send_message(self, widget):
         start_iter = self.input_buffer.get_start_iter()
         end_iter = self.input_buffer.get_end_iter()
-        user_message = self.input_buffer.get_text(start_iter, end_iter, True)
+        user_message = self.input_buffer.get_text(start_iter, end_iter, 
+True)
         self.input_buffer.set_text("")
 
         self.chat_buffer.insert_at_cursor(f"Użytkownik: {user_message}\n")
-        asyncio.run_coroutine_threadsafe(self.get_response(user_message), self.loop)
+        asyncio.run_coroutine_threadsafe(self.get_response(user_message), 
+self.loop)
 
     async def get_response(self, user_message):
         message = {'role': 'user', 'content': user_message}
-        async for part in await AsyncClient().chat(model='codellama', messages=[message], stream=True):
+        async for part in await AsyncClient().chat(model='llama3', 
+messages=[message], stream=True):
             content = part['message']['content']
             GLib.idle_add(self.chat_buffer.insert_at_cursor, content)
         GLib.idle_add(self.chat_buffer.insert_at_cursor, "\n")
@@ -67,3 +72,4 @@ window = ChatWindow()
 window.connect("destroy", Gtk.main_quit)
 window.show_all()
 Gtk.main()
+
